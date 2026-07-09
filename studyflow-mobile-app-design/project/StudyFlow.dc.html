@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @keyframes popCheck { 0%{transform:scale(0.7);} 60%{transform:scale(1.15);} 100%{transform:scale(1);} }
+    @keyframes fadeSlide { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    * { box-sizing: border-box; }
+    body { margin:0; }
+  </style>
+</helmet>
+<div style="min-height:100%; display:flex; align-items:center; justify-content:center; background:oklch(93% 0.004 90); padding:40px; font-family:'Inter',sans-serif;">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" dark="{{ isDark }}" hint-size="412,892">
+  <div style="{{ appShellStyle }}">
+    <div style="{{ scrollAreaStyle }}">
+
+      <!-- ===================== DASHBOARD ===================== -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ screenPadStyle }}">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px;">
+            <div>
+              <div style="{{ mutedTextStyle }}; font-size:13px;">{{ greeting }}</div>
+              <div style="{{ headingLgStyle }}">{{ todayLabel }}</div>
+            </div>
+            <div style="{{ streakBadgeStyle }}">
+              <div style="font-family:'Poppins',sans-serif; font-size:18px; font-weight:700; line-height:1;">{{ streak }}</div>
+              <div style="font-size:9px; margin-top:2px; opacity:0.8;">day streak</div>
+            </div>
+          </div>
+
+          <div style="{{ dailyGoalHighlightStyle }}">{{ dailyGoalHighlightLabel }}</div>
+
+          <div style="{{ ringCardStyle }}">
+            <svg width="128" height="128" viewBox="0 0 128 128" style="flex-shrink:0;">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="{{ goalRing.gradFrom }}"></stop>
+                  <stop offset="100%" stop-color="{{ goalRing.gradTo }}"></stop>
+                </linearGradient>
+              </defs>
+              <circle cx="64" cy="64" r="54" fill="none" stroke="{{ goalRing.trackColor }}" stroke-width="12"></circle>
+              <circle cx="64" cy="64" r="54" fill="none" stroke="url(#ringGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="{{ goalRing.dashArray }}" transform="rotate(-90 64 64)"></circle>
+              <text x="64" y="60" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="20" fill="{{ goalRing.textColor }}">{{ goalRing.centerLabel }}</text>
+              <text x="64" y="78" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="{{ goalRing.subColor }}">{{ goalRing.centerSub }}</text>
+            </svg>
+            <div style="flex:1; min-width:0;">
+              <div style="{{ sectionTitleStyle }}">Today's goal</div>
+              <div style="{{ mutedTextStyle }}; font-size:13px; line-height:1.5;">{{ goalRing.description }}</div>
+            </div>
+          </div>
+
+          <div style="{{ weeklyBannerStyle }}" onClick="{{ goWeeklySummary }}">
+            <div style="flex:1;">
+              <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:14px;">Your week in review</div>
+              <div style="font-size:12px; margin-top:2px; opacity:0.85;">{{ weeklyBannerSub }}</div>
+            </div>
+            <div style="font-size:20px; opacity:0.7;">&rsaquo;</div>
+          </div>
+
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin:26px 0 12px;">
+            <div style="{{ sectionTitleStyle }}">Today's tasks</div>
+            <div style="{{ mutedTextStyle }}; font-size:12px;">{{ todayTaskCountLabel }}</div>
+          </div>
+
+          <sc-if value="{{ todayTasksEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ emptyStateStyle }}">
+              <div style="font-size:32px; margin-bottom:8px;">&#9998;</div>
+              <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; margin-bottom:4px;">No tasks yet</div>
+              <div style="{{ mutedTextStyle }}; font-size:13px; text-align:center; max-width:220px;">Add your first study session for today and get moving.</div>
+            </div>
+          </sc-if>
+
+          <sc-for list="{{ todayTasks }}" as="task" hint-placeholder-count="3">
+            <div style="{{ task.rowStyle }}">
+              <div style="{{ task.checkboxStyle }}" onClick="{{ task.toggle }}">
+                <span style="{{ task.checkGlyphStyle }}">&#10003;</span>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="{{ task.nameStyle }}">{{ task.name }}</div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                  <span style="{{ task.subjectDotStyle }}"></span>
+                  <span style="{{ task.metaStyle }}">{{ task.subject }} &middot; {{ task.durationLabel }}</span>
+                </div>
+              </div>
+              <span style="{{ task.priorityDotStyle }}"></span>
+              <div style="{{ task.openTaskStyle }}" onClick="{{ task.openTask }}">+</div>
+            </div>
+          </sc-for>
+
+          <div style="height:96px;"></div>
+        </div>
+
+        <div style="{{ fabStyle }}" onClick="{{ goAddTaskFromDash }}">+</div>
+      </sc-if>
+
+      <!-- ===================== CALENDAR ===================== -->
+      <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ headingLgStyle }}; margin-bottom:4px;">Calendar</div>
+          <div style="{{ mutedTextStyle }}; font-size:13px; margin-bottom:18px;">{{ calendarStreakLabel }}</div>
+
+          <div style="{{ segWrapStyle }}">
+            <div style="{{ segMonthStyle }}" onClick="{{ setMonthMode }}">Month</div>
+            <div style="{{ segWeekStyle }}" onClick="{{ setWeekMode }}">Week</div>
+          </div>
+
+          <sc-if value="{{ isMonthView }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin:20px 0 12px;">
+              <div style="{{ navArrowStyle }}" onClick="{{ prevMonth }}">&lsaquo;</div>
+              <div style="{{ sectionTitleStyle }}">{{ monthLabel }}</div>
+              <div style="{{ navArrowStyle }}" onClick="{{ nextMonth }}">&rsaquo;</div>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px;">
+              <sc-for list="{{ weekdayLabels }}" as="wd" hint-placeholder-count="7">
+                <div style="{{ weekdayLabelStyle }}">{{ wd }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px;">
+              <sc-for list="{{ monthGrid }}" as="cell" hint-placeholder-count="42">
+                <div style="{{ cell.style }}" onClick="{{ cell.onClick }}">{{ cell.dayNumber }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isWeekView }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin:20px 0 14px;">
+              <div style="{{ navArrowStyle }}" onClick="{{ prevWeek }}">&lsaquo;</div>
+              <div style="{{ sectionTitleStyle }}">{{ weekLabel }}</div>
+              <div style="{{ navArrowStyle }}" onClick="{{ nextWeek }}">&rsaquo;</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <sc-for list="{{ weekDays }}" as="wd" hint-placeholder-count="7">
+                <div style="{{ wd.cardStyle }}" onClick="{{ wd.onClick }}">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="{{ wd.dotStyle }}"></span>
+                    <div>
+                      <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:13px;">{{ wd.weekdayLabel }}</div>
+                      <div style="{{ mutedTextStyle }}; font-size:11px;">{{ wd.dateLabel }}</div>
+                    </div>
+                  </div>
+                  <div style="font-size:13px; font-weight:600;">{{ wd.minutesLabel }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===================== PROGRESS ===================== -->
+      <sc-if value="{{ isProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ headingLgStyle }}; margin-bottom:18px;">Progress</div>
+
+          <div style="{{ segWrapStyle }}">
+            <div style="{{ segProgWeekStyle }}" onClick="{{ setRangeWeek }}">This week</div>
+            <div style="{{ segProgMonthStyle }}" onClick="{{ setRangeMonth }}">This month</div>
+          </div>
+
+          <div style="{{ statRowStyle }}">
+            <div style="{{ statCardStyle }}">
+              <div style="{{ statValueStyle }}">{{ totalStudyLabel }}</div>
+              <div style="{{ mutedTextStyle }}; font-size:11px;">Total studied</div>
+            </div>
+            <div style="{{ statCardStyle }}">
+              <div style="{{ statValueStyle }}">{{ goalCompletionLabel }}</div>
+              <div style="{{ mutedTextStyle }}; font-size:11px;">Goal completion</div>
+            </div>
+          </div>
+
+          <div style="{{ sectionTitleStyle }}; margin:24px 0 14px;">Study time</div>
+          <div style="{{ chartWrapStyle }}">
+            <sc-for list="{{ chartBars }}" as="bar" hint-placeholder-count="7">
+              <div style="{{ bar.colStyle }}" onClick="{{ bar.onClick }}">
+                <div style="{{ bar.trackStyle }}">
+                  <div style="{{ bar.fillStyle }}"></div>
+                </div>
+                <div style="{{ mutedTextStyle }}; font-size:10px; margin-top:6px;">{{ bar.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="{{ sectionTitleStyle }}; margin:28px 0 14px;">By subject</div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <sc-for list="{{ subjectRows }}" as="s" hint-placeholder-count="5">
+              <div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                  <span style="font-size:13px; font-weight:500;">{{ s.label }}</span>
+                  <span style="{{ mutedTextStyle }}; font-size:12px;">{{ s.valueLabel }}</span>
+                </div>
+                <div style="{{ s.trackStyle }}">
+                  <div style="{{ s.barStyle }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="height:24px;"></div>
+        </div>
+      </sc-if>
+
+      <!-- ===================== ADD TASK ===================== -->
+      <sc-if value="{{ isAddTask }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ pushHeaderStyle }}">
+          <div style="{{ backArrowStyle }}" onClick="{{ goBack }}">&larr;</div>
+          <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:16px;">{{ addTaskHeaderLabel }}</div>
+          <div style="width:28px;"></div>
+        </div>
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ mutedTextStyle }}; font-size:12px; margin-bottom:18px;">For {{ addTaskDateLabel }}</div>
+
+          <div style="{{ fieldLabelStyle }}">Subject</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+            <sc-for list="{{ subjectChips }}" as="chip" hint-placeholder-count="5">
+              <div style="{{ chip.style }}" onClick="{{ chip.onClick }}">{{ chip.name }}</div>
+            </sc-for>
+          </div>
+
+          <div style="{{ fieldLabelStyle }}">Task name</div>
+          <input type="text" value="{{ formName }}" onChange="{{ setFormName }}" placeholder="e.g. Practice problem set" style="{{ inputStyle }}"></input>
+
+          <div style="{{ fieldLabelStyle }}; margin-top:20px;">Duration</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+            <sc-for list="{{ durationChips }}" as="chip" hint-placeholder-count="5">
+              <div style="{{ chip.style }}" onClick="{{ chip.onClick }}">{{ chip.label }}</div>
+            </sc-for>
+          </div>
+
+          <div style="{{ fieldLabelStyle }}">Priority</div>
+          <div style="{{ segWrapStyle }}; margin-bottom:20px;">
+            <sc-for list="{{ priorityOptions }}" as="opt" hint-placeholder-count="3">
+              <div style="{{ opt.style }}" onClick="{{ opt.onClick }}">{{ opt.label }}</div>
+            </sc-for>
+          </div>
+
+          <div style="{{ fieldLabelStyle }}">Notes <span style="opacity:0.6; font-weight:400;">(optional)</span></div>
+          <textarea value="{{ formNotes }}" onChange="{{ setFormNotes }}" placeholder="Anything to remember for this session..." style="{{ textareaStyle }}"></textarea>
+
+          <div style="{{ toggleRowStyle }}; margin-top:20px;">
+            <div>
+              <div style="font-size:14px; font-weight:500;">Remind me</div>
+              <div style="{{ mutedTextStyle }}; font-size:12px;">Gentle nudge at your scheduled time</div>
+            </div>
+            <div style="{{ reminderSwitchTrackStyle }}" onClick="{{ toggleFormReminder }}">
+              <div style="{{ reminderSwitchThumbStyle }}"></div>
+            </div>
+          </div>
+
+          <div style="height:20px;"></div>
+        </div>
+        <div style="{{ saveBarStyle }}">
+          <div style="{{ saveButtonStyle }}" onClick="{{ saveTask }}">{{ saveButtonLabel }}</div>
+          <sc-if value="{{ isEditingTask }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ deleteTaskButtonStyle }}" onClick="{{ deleteCurrentTask }}">Delete task</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===================== DAY SUMMARY ===================== -->
+      <sc-if value="{{ isDaySummary }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ pushHeaderStyle }}">
+          <div style="{{ backArrowStyle }}" onClick="{{ goBack }}">&larr;</div>
+          <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:16px;">{{ selectedDayLabel }}</div>
+          <div style="width:28px;"></div>
+        </div>
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ mutedTextStyle }}; font-size:13px; margin-bottom:18px;">{{ selectedDayStatsLabel }}</div>
+
+          <sc-if value="{{ selectedDayEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ emptyStateStyle }}">
+              <div style="font-size:32px; margin-bottom:8px;">&#128197;</div>
+              <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; margin-bottom:4px;">Nothing logged</div>
+              <div style="{{ mutedTextStyle }}; font-size:13px; text-align:center; max-width:220px;">No study sessions were recorded on this day.</div>
+            </div>
+          </sc-if>
+
+          <sc-for list="{{ selectedDayTasks }}" as="task" hint-placeholder-count="3">
+            <div style="{{ task.rowStyle }}">
+              <div style="{{ task.checkboxStyle }}" onClick="{{ task.toggle }}">
+                <span style="{{ task.checkGlyphStyle }}">&#10003;</span>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="{{ task.nameStyle }}">{{ task.name }}</div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                  <span style="{{ task.subjectDotStyle }}"></span>
+                  <span style="{{ task.metaStyle }}">{{ task.subject }} &middot; {{ task.durationLabel }}</span>
+                </div>
+              </div>
+              <span style="{{ task.priorityDotStyle }}"></span>
+              <div style="{{ task.openTaskStyle }}" onClick="{{ task.openTask }}">+</div>
+            </div>
+          </sc-for>
+          <div style="height:24px;"></div>
+        </div>
+      </sc-if>
+
+      <!-- ===================== WEEKLY SUMMARY ===================== -->
+      <sc-if value="{{ isWeeklySummary }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ pushHeaderStyle }}">
+          <div style="{{ backArrowStyle }}" onClick="{{ goBack }}">&larr;</div>
+          <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:16px;">Weekly Summary</div>
+          <div style="width:28px;"></div>
+        </div>
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ mutedTextStyle }}; font-size:13px; margin-bottom:6px;">{{ weekSummaryRangeLabel }}</div>
+          <div style="{{ bigStatCardStyle }}">
+            <div style="font-family:'Poppins',sans-serif; font-weight:700; font-size:38px;">{{ totalHoursBig }}</div>
+            <div style="font-size:13px; opacity:0.85; margin-top:2px;">hours studied this week</div>
+          </div>
+
+          <div style="{{ summaryGridStyle }}">
+            <sc-for list="{{ statCards }}" as="card" hint-placeholder-count="3">
+              <div style="{{ statCardStyle }}">
+                <div style="{{ statValueStyle }}">{{ card.value }}</div>
+                <div style="{{ mutedTextStyle }}; font-size:11px;">{{ card.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="{{ sectionTitleStyle }}; margin:24px 0 14px;">Study time</div>
+          <div style="{{ chartWrapStyle }}">
+            <sc-for list="{{ weekMiniBars }}" as="bar" hint-placeholder-count="7">
+              <div style="{{ bar.colStyle }}" onClick="{{ bar.onClick }}">
+                <div style="{{ bar.trackStyle }}">
+                  <div style="{{ bar.fillStyle }}"></div>
+                </div>
+                <div style="{{ mutedTextStyle }}; font-size:10px; margin-top:6px;">{{ bar.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="{{ motivationCardStyle }}">{{ motivationalMsg }}</div>
+          <div style="height:24px;"></div>
+        </div>
+      </sc-if>
+
+      <!-- ===================== SETTINGS ===================== -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ screenPadStyle }}">
+          <div style="{{ headingLgStyle }}; margin-bottom:22px;">Settings</div>
+
+          <div style="{{ sectionTitleStyle }}; margin-bottom:12px;">Daily goal</div>
+          <div style="{{ cardStyle }}">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div style="font-size:14px; font-weight:500;">Study time per day</div>
+                <div style="{{ mutedTextStyle }}; font-size:12px; margin-top:2px;">Used to track your daily progress ring</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div style="{{ stepperBtnStyle }}" onClick="{{ decGoal }}">&minus;</div>
+                <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:14px; min-width:52px; text-align:center;">{{ goalHoursLabel }}</div>
+                <div style="{{ stepperBtnStyle }}" onClick="{{ incGoal }}">+</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="{{ sectionTitleStyle }}; margin:24px 0 12px;">Notifications</div>
+          <div style="{{ cardStyle }}">
+            <div style="{{ toggleRowStyle }}">
+              <div>
+                <div style="font-size:14px; font-weight:500;">Session reminders</div>
+                <div style="{{ mutedTextStyle }}; font-size:12px;">Notify me at scheduled study times</div>
+              </div>
+              <div style="{{ notifSessionTrackStyle }}" onClick="{{ toggleNotifSession }}">
+                <div style="{{ notifSessionThumbStyle }}"></div>
+              </div>
+            </div>
+            <div style="{{ dividerStyle }}"></div>
+            <div style="{{ toggleRowStyle }}">
+              <div>
+                <div style="font-size:14px; font-weight:500;">Daily goal nudge</div>
+                <div style="{{ mutedTextStyle }}; font-size:12px;">Remind me if I haven't started today</div>
+              </div>
+              <div style="{{ notifNudgeTrackStyle }}" onClick="{{ toggleNotifNudge }}">
+                <div style="{{ notifNudgeThumbStyle }}"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="{{ sectionTitleStyle }}; margin:24px 0 12px;">Appearance</div>
+          <div style="{{ segWrapStyle }}">
+            <div style="{{ segLightStyle }}" onClick="{{ setLightTheme }}">Light</div>
+            <div style="{{ segDarkStyle }}" onClick="{{ setDarkTheme }}">Dark</div>
+          </div>
+          <div style="height:24px;"></div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <sc-if value="{{ showBottomNav }}" hint-placeholder-val="{{ true }}">
+      <div style="{{ tabBarStyle }}">
+        <div style="{{ tabHomeWrapStyle }}" onClick="{{ goHome }}">
+          <div style="width:20px; height:16px; position:relative; margin:0 auto;">
+            <div style="position:absolute; top:0; left:2px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:7px solid currentColor;"></div>
+            <div style="position:absolute; bottom:0; left:3px; width:14px; height:9px; background:currentColor; border-radius:1px;"></div>
+          </div>
+          <div style="font-size:10px; margin-top:5px; text-align:center;">Home</div>
+        </div>
+        <div style="{{ tabCalendarWrapStyle }}" onClick="{{ goCalendar }}">
+          <div style="width:18px; height:16px; border:1.6px solid currentColor; border-radius:3px; margin:0 auto; position:relative;">
+            <div style="position:absolute; top:-1.6px; left:2px; width:2px; height:4px; background:currentColor;"></div>
+            <div style="position:absolute; top:-1.6px; right:2px; width:2px; height:4px; background:currentColor;"></div>
+            <div style="position:absolute; top:5px; left:0; right:0; height:1.4px; background:currentColor;"></div>
+          </div>
+          <div style="font-size:10px; margin-top:5px; text-align:center;">Calendar</div>
+        </div>
+        <div style="{{ tabProgressWrapStyle }}" onClick="{{ goProgress }}">
+          <div style="display:flex; align-items:flex-end; gap:2.5px; height:16px; margin:0 auto; width:18px;">
+            <div style="width:4px; height:8px; background:currentColor; border-radius:1px;"></div>
+            <div style="width:4px; height:14px; background:currentColor; border-radius:1px;"></div>
+            <div style="width:4px; height:11px; background:currentColor; border-radius:1px;"></div>
+          </div>
+          <div style="font-size:10px; margin-top:5px; text-align:center;">Progress</div>
+        </div>
+        <div style="{{ tabSettingsWrapStyle }}" onClick="{{ goSettings }}">
+          <div style="width:18px; height:18px; border:1.6px solid currentColor; border-radius:50%; margin:0 auto; position:relative;">
+            <div style="position:absolute; top:50%; left:50%; width:6px; height:6px; background:currentColor; border-radius:50%; transform:translate(-50%,-50%);"></div>
+          </div>
+          <div style="font-size:10px; margin-top:5px; text-align:center;">Settings</div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+const SUBJECTS = ['Math','Physics','English','History','Chemistry','Urdu','Islamiyat','Commerce'];
+const SUBJECT_L_LIGHT = { Math:34, Physics:40, English:45, History:51, Chemistry:56, Urdu:62, Islamiyat:67, Commerce:73 };
+const SUBJECT_L_DARK  = { Math:54, Physics:58, English:62, History:66, Chemistry:70, Urdu:74, Islamiyat:78, Commerce:82 };
+
+function subjectColor(subject, theme) {
+  const L = (theme === 'dark' ? SUBJECT_L_DARK : SUBJECT_L_LIGHT)[subject] ?? 55;
+  return `oklch(${L}% 0.09 178)`;
+}
+function priorityColor(p, t) { return p === 'high' ? t.coral : p === 'med' ? t.amber : t.accent; }
+function priorityLabel(p) { return p === 'high' ? 'High' : p === 'med' ? 'Medium' : 'Low'; }
+
+function fmtMin(m) {
+  if (m <= 0) return '0m';
+  if (m < 60) return m + 'm';
+  const h = Math.floor(m / 60), r = m % 60;
+  return r ? h + 'h ' + r + 'm' : h + 'h';
+}
+function isoLocal(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+
+const DAY_PLANS = [
+  { offset: 0, tasks: [
+    { subject: 'Math', name: 'Practice problem set', duration: 45, priority: 'high', completed: true },
+    { subject: 'Physics', name: 'Mechanics review', duration: 40, priority: 'med', completed: true },
+    { subject: 'English', name: 'Essay draft', duration: 50, priority: 'med', completed: false },
+  ]},
+  { offset: -1, tasks: [
+    { subject: 'Math', name: 'Calculus worksheet', duration: 60, priority: 'high', completed: true },
+    { subject: 'History', name: 'Chapter 5 notes', duration: 45, priority: 'low', completed: true },
+    { subject: 'Chemistry', name: 'Reaction practice', duration: 75, priority: 'med', completed: true },
+  ]},
+  { offset: -2, tasks: [
+    { subject: 'Physics', name: 'Lab report prep', duration: 50, priority: 'med', completed: true },
+    { subject: 'English', name: 'Reading assignment', duration: 40, priority: 'low', completed: true },
+    { subject: 'Math', name: 'Practice problems', duration: 100, priority: 'high', completed: true },
+  ]},
+  { offset: -3, tasks: [
+    { subject: 'Chemistry', name: 'Organic chem review', duration: 60, priority: 'med', completed: true },
+    { subject: 'History', name: 'Essay outline', duration: 50, priority: 'low', completed: true },
+    { subject: 'Math', name: 'Problem set 4', duration: 80, priority: 'high', completed: true },
+  ]},
+  { offset: -4, tasks: [
+    { subject: 'English', name: 'Vocabulary review', duration: 35, priority: 'low', completed: true },
+    { subject: 'Physics', name: 'Formula sheet review', duration: 55, priority: 'med', completed: true },
+    { subject: 'Math', name: 'Geometry practice', duration: 100, priority: 'high', completed: true },
+  ]},
+  { offset: -5, tasks: [
+    { subject: 'History', name: 'Timeline review', duration: 60, priority: 'med', completed: true },
+    { subject: 'Chemistry', name: 'Lab prep', duration: 70, priority: 'med', completed: true },
+    { subject: 'English', name: 'Essay revision', duration: 60, priority: 'high', completed: true },
+  ]},
+  { offset: -6, tasks: [] },
+  { offset: -7, tasks: [
+    { subject: 'Math', name: 'Practice problem set', duration: 90, priority: 'high', completed: true },
+    { subject: 'Physics', name: 'Chapter review', duration: 70, priority: 'med', completed: true },
+    { subject: 'English', name: 'Reading assignment', duration: 45, priority: 'low', completed: true },
+  ]},
+  { offset: -8, tasks: [
+    { subject: 'Chemistry', name: 'Organic chem practice', duration: 90, priority: 'high', completed: true },
+    { subject: 'History', name: 'Chapter notes', duration: 60, priority: 'med', completed: true },
+    { subject: 'Math', name: 'Worksheet review', duration: 50, priority: 'low', completed: true },
+  ]},
+  { offset: -9, tasks: [
+    { subject: 'English', name: 'Essay draft', duration: 45, priority: 'med', completed: true },
+    { subject: 'Physics', name: 'Problem set', duration: 30, priority: 'low', completed: false },
+  ]},
+  { offset: -10, tasks: [] },
+  { offset: -11, tasks: [
+    { subject: 'Math', name: 'Calculus review', duration: 80, priority: 'high', completed: true },
+    { subject: 'History', name: 'Timeline review', duration: 55, priority: 'med', completed: true },
+    { subject: 'Chemistry', name: 'Lab prep', duration: 65, priority: 'med', completed: true },
+  ]},
+  { offset: -12, tasks: [
+    { subject: 'Physics', name: 'Mechanics review', duration: 70, priority: 'med', completed: true },
+    { subject: 'English', name: 'Reading assignment', duration: 50, priority: 'low', completed: true },
+    { subject: 'Math', name: 'Problem set', duration: 70, priority: 'high', completed: true },
+  ]},
+  { offset: -13, tasks: [
+    { subject: 'Chemistry', name: 'Organic chem review', duration: 60, priority: 'med', completed: true },
+    { subject: 'History', name: 'Essay outline', duration: 55, priority: 'low', completed: true },
+    { subject: 'Math', name: 'Geometry practice', duration: 75, priority: 'high', completed: true },
+  ]},
+];
+
+function buildSeedTasks() {
+  const today = new Date();
+  let id = 1;
+  const tasks = [];
+  DAY_PLANS.forEach(plan => {
+    const iso = isoLocal(addDays(today, plan.offset));
+    plan.tasks.forEach(tk => tasks.push({ id: id++, date: iso, ...tk }));
+  });
+  return tasks;
+}
+
+function dayStats(tasks, iso, goal, todayIso) {
+  const dayTasks = tasks.filter(t => t.date === iso);
+  const completedMinutes = dayTasks.filter(t => t.completed).reduce((s, t) => s + t.duration, 0);
+  const totalMinutes = dayTasks.reduce((s, t) => s + t.duration, 0);
+  const completedCount = dayTasks.filter(t => t.completed).length;
+  let status;
+  if (iso > todayIso) status = 'future';
+  else if (dayTasks.length === 0) status = iso === todayIso ? 'empty' : 'missed';
+  else if (completedMinutes >= goal) status = 'met';
+  else status = 'partial';
+  return { dayTasks, completedMinutes, totalMinutes, completedCount, totalCount: dayTasks.length, status };
+}
+
+function computeStreak(tasks, goal, todayDate) {
+  let streak = 0;
+  let cursor = addDays(todayDate, -1);
+  const todayIso = isoLocal(todayDate);
+  for (let i = 0; i < 90; i++) {
+    const iso = isoLocal(cursor);
+    const s = dayStats(tasks, iso, goal, todayIso);
+    if (s.status === 'met') { streak++; cursor = addDays(cursor, -1); } else break;
+  }
+  return streak;
+}
+
+const LIGHT = {
+  bg: 'oklch(97% 0.004 90)', card: 'oklch(99% 0.002 90)', text: 'oklch(22% 0.01 260)',
+  textMuted: 'oklch(52% 0.01 260)', border: 'oklch(90% 0.006 90)',
+  accent: 'oklch(58% 0.09 178)', accentSoft: 'oklch(93% 0.035 178)', accentDark: 'oklch(42% 0.09 178)',
+  amber: 'oklch(62% 0.1 75)', amberSoft: 'oklch(93% 0.04 75)',
+  coral: 'oklch(60% 0.11 25)', coralSoft: 'oklch(93% 0.03 25)',
+  shadow: '0 1px 2px rgba(20,20,15,0.04), 0 6px 20px rgba(20,20,15,0.06)',
+};
+const DARK = {
+  bg: 'oklch(21% 0.006 250)', card: 'oklch(27% 0.008 250)', text: 'oklch(95% 0.004 250)',
+  textMuted: 'oklch(66% 0.012 250)', border: 'oklch(36% 0.012 250)',
+  accent: 'oklch(72% 0.1 178)', accentSoft: 'oklch(33% 0.05 178)', accentDark: 'oklch(85% 0.08 178)',
+  amber: 'oklch(74% 0.1 75)', amberSoft: 'oklch(34% 0.05 75)',
+  coral: 'oklch(72% 0.11 25)', coralSoft: 'oklch(34% 0.045 25)',
+  shadow: '0 1px 2px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.4)',
+};
+
+function fontI(size, weight, color, extra) { return Object.assign({ fontFamily: 'Inter, sans-serif', fontSize: size, fontWeight: weight, color }, extra || {}); }
+
+class Component extends DCLogic {
+  state = {
+    theme: 'light',
+    screen: 'dashboard',
+    tasks: buildSeedTasks(),
+    dailyGoalMinutes: 180,
+    calendarMode: 'month',
+    monthOffset: 0,
+    weekOffset: 0,
+    progressRange: 'week',
+    selectedDate: null,
+    addForm: { id: null, subject: 'Math', name: '', duration: 30, priority: 'med', notes: '', reminder: true },
+    notifSession: true,
+    notifNudge: true,
+    ringAnimT: 0,
+  };
+
+  componentDidMount() {
+    const duration = 650;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      this.setState({ ringAnimT: eased });
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  nav(screen, extra) { this.setState(Object.assign({ screen }, extra || {})); }
+
+  toggleTaskById(id) {
+    this.setState(s => ({ tasks: s.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t) }));
+  }
+
+  deleteTaskById(id) {
+    this.setState(s => ({ tasks: s.tasks.filter(t => t.id !== id) }));
+  }
+
+  startEditTask(task) {
+    this.setState({
+      screen: 'addTask',
+      addForm: { id: task.id, subject: task.subject, name: task.name, duration: task.duration, priority: task.priority, notes: '', reminder: true },
+    });
+  }
+
+  makeTaskRow(task, t, isDark) {
+    const dot = subjectColor(task.subject, this.state.theme);
+    const pcolor = priorityColor(task.priority, t);
+    return {
+      id: task.id,
+      name: task.name,
+      subject: task.subject,
+      durationLabel: fmtMin(task.duration),
+      toggle: () => this.toggleTaskById(task.id),
+      openTask: () => this.startEditTask(task),
+      openTaskStyle: { width: 26, height: 26, borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: t.textMuted, cursor: 'pointer' },
+      rowStyle: {
+        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 4px',
+        borderBottom: `1px solid ${t.border}`,
+      },
+      checkboxStyle: {
+        width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+        border: task.completed ? 'none' : `2px solid ${t.border}`,
+        background: task.completed ? t.accent : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+        animation: task.completed ? 'popCheck 0.28s ease' : 'none',
+      },
+      checkGlyphStyle: { color: isDark ? t.bg : '#fff', fontSize: 13, fontWeight: 700, opacity: task.completed ? 1 : 0 },
+      nameStyle: fontI(14, 500, task.completed ? t.textMuted : t.text, { textDecoration: task.completed ? 'line-through' : 'none' }),
+      subjectDotStyle: { width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 },
+      metaStyle: fontI(12, 400, t.textMuted, {}),
+      priorityDotStyle: { width: 8, height: 8, borderRadius: '50%', background: pcolor, flexShrink: 0 },
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const isDark = s.theme === 'dark';
+    const t = isDark ? DARK : LIGHT;
+    const today = new Date();
+    const todayIso = isoLocal(today);
+    const goal = s.dailyGoalMinutes;
+
+    const screenPadStyle = { padding: '20px 20px 0' };
+    const mutedTextStyle = { color: t.textMuted, fontFamily: 'Inter, sans-serif' };
+    const sectionTitleStyle = { fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 15, color: t.text };
+    const headingLgStyle = { fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: 20, color: t.text, marginTop: 2 };
+    const cardStyle = { background: t.card, borderRadius: 18, padding: 16, boxShadow: t.shadow };
+    const emptyStateStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '36px 20px', color: t.textMuted, animation: 'fadeSlide 0.3s ease' };
+    const navArrowStyle = { width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: t.textMuted, cursor: 'pointer', userSelect: 'none' };
+    const weekdayLabelStyle = { textAlign: 'center', fontSize: 11, color: t.textMuted, fontWeight: 500, padding: '4px 0' };
+    const pushHeaderStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px 6px', flexShrink: 0 };
+    const backArrowStyle = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: t.text, cursor: 'pointer' };
+    const fieldLabelStyle = { fontSize: 13, fontWeight: 600, color: t.text, marginBottom: 8, fontFamily: 'Inter, sans-serif' };
+    const inputStyle = { width: '100%', padding: '13px 14px', borderRadius: 12, border: `1.5px solid ${t.border}`, background: t.card, color: t.text, fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' };
+    const textareaStyle = Object.assign({}, inputStyle, { minHeight: 72, resize: 'none', fontFamily: 'Inter, sans-serif' });
+    const toggleRowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0' };
+    const dividerStyle = { height: 1, background: t.border, margin: '2px 0' };
+    const stepperBtnStyle = { width: 30, height: 30, borderRadius: 10, background: t.accentSoft, color: t.accentDark, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 600, cursor: 'pointer', userSelect: 'none' };
+    const chartWrapStyle = { display: 'flex', alignItems: 'flex-end', gap: 8, height: 150, padding: '4px 2px' };
+    const statRowStyle = { display: 'flex', gap: 12 };
+    const statCardStyle = { background: t.card, borderRadius: 16, padding: '14px 14px', boxShadow: t.shadow, flex: 1, textAlign: 'center' };
+    const statValueStyle = { fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 17, color: t.text, marginBottom: 3 };
+    const bigStatCardStyle = { background: t.accent, color: isDark ? t.bg : '#fff', borderRadius: 20, padding: '22px 20px', marginTop: 10, marginBottom: 18, textAlign: 'center' };
+    const summaryGridStyle = { display: 'flex', gap: 10 };
+    const motivationCardStyle = { background: t.amberSoft, color: t.text, borderRadius: 16, padding: '16px 16px', fontSize: 13, lineHeight: 1.5, marginTop: 8, fontFamily: 'Inter, sans-serif' };
+
+    function seg(active) { return { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: active ? t.card : 'transparent', color: active ? t.text : t.textMuted, boxShadow: active ? t.shadow : 'none', transition: 'all 0.15s ease' }; }
+    const segWrapStyle = { display: 'flex', gap: 4, background: t.accentSoft, borderRadius: 14, padding: 4 };
+
+    // ---------------- Dashboard ----------------
+    const streak = computeStreak(s.tasks, goal, today);
+    const todayStatsD = dayStats(s.tasks, todayIso, goal, todayIso);
+    const pct = Math.max(0, Math.min(1, todayStatsD.completedMinutes / goal));
+    const circumference = 2 * Math.PI * 54;
+    const goalRing = {
+      trackColor: t.accentSoft, progressColor: t.accent, gradFrom: t.accent, gradTo: t.accentDark, textColor: t.text, subColor: t.textMuted,
+      dashArray: `${circumference * pct * s.ringAnimT} ${circumference}`,
+      centerLabel: fmtMin(todayStatsD.completedMinutes),
+      centerSub: `of ${fmtMin(goal)}`,
+      description: pct >= 1 ? "You've hit today's goal — nice work." : `${fmtMin(Math.max(0, goal - todayStatsD.completedMinutes))} left to reach today's goal.`,
+    };
+    const todayTasks = s.tasks.filter(x => x.date === todayIso).map(x => this.makeTaskRow(x, t, isDark));
+
+    return {
+      isDark, screen: s.screen,
+      isDashboard: s.screen === 'dashboard',
+      isCalendar: s.screen === 'calendar',
+      isProgress: s.screen === 'progress',
+      isAddTask: s.screen === 'addTask',
+      isDaySummary: s.screen === 'daySummary',
+      isWeeklySummary: s.screen === 'weeklySummary',
+      isSettings: s.screen === 'settings',
+      isMonthView: s.calendarMode === 'month',
+      isWeekView: s.calendarMode === 'week',
+      showBottomNav: ['dashboard', 'calendar', 'progress', 'settings'].includes(s.screen),
+      appShellStyle: { height: '100%', display: 'flex', flexDirection: 'column', background: t.bg, fontFamily: 'Inter, sans-serif', color: t.text, position: 'relative', overflow: 'hidden' },
+      scrollAreaStyle: { flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', position: 'relative' },
+      screenPadStyle, mutedTextStyle, sectionTitleStyle, headingLgStyle, cardStyle, emptyStateStyle,
+      navArrowStyle, weekdayLabelStyle, pushHeaderStyle, backArrowStyle, fieldLabelStyle, inputStyle, textareaStyle,
+      toggleRowStyle, dividerStyle, stepperBtnStyle, chartWrapStyle, statRowStyle, statCardStyle, statValueStyle,
+      bigStatCardStyle, summaryGridStyle, motivationCardStyle, segWrapStyle,
+
+      goHome: () => this.nav('dashboard'),
+      goCalendar: () => this.nav('calendar'),
+      goProgress: () => this.nav('progress'),
+      goSettings: () => this.nav('settings'),
+      goBack: () => this.nav('dashboard'),
+      goAddTaskFromDash: () => this.setState({ screen: 'addTask', addForm: { id: null, subject: 'Math', name: '', duration: 30, priority: 'med', notes: '', reminder: true } }),
+      goWeeklySummary: () => this.nav('weeklySummary'),
+
+      tabBarStyle: { display: 'flex', flexShrink: 0, padding: '10px 8px 8px', borderTop: `1px solid ${t.border}`, background: t.card },
+      tabHomeWrapStyle: { flex: 1, textAlign: 'center', cursor: 'pointer', color: s.screen === 'dashboard' ? t.accent : t.textMuted },
+      tabCalendarWrapStyle: { flex: 1, textAlign: 'center', cursor: 'pointer', color: s.screen === 'calendar' ? t.accent : t.textMuted },
+      tabProgressWrapStyle: { flex: 1, textAlign: 'center', cursor: 'pointer', color: s.screen === 'progress' ? t.accent : t.textMuted },
+      tabSettingsWrapStyle: { flex: 1, textAlign: 'center', cursor: 'pointer', color: s.screen === 'settings' ? t.accent : t.textMuted },
+
+      // Dashboard
+      greeting: today.getHours() < 12 ? 'Good morning' : today.getHours() < 18 ? 'Good afternoon' : 'Good evening',
+      todayLabel: today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+      streak,
+      streakBadgeStyle: { background: t.accentSoft, color: t.accentDark, borderRadius: 16, padding: '8px 14px', textAlign: 'center', minWidth: 56 },
+      ringCardStyle: { display: 'flex', alignItems: 'center', gap: 16, background: t.card, borderRadius: 20, padding: 16, boxShadow: t.shadow },
+      goalRing,
+      dailyGoalHighlightLabel: `${fmtMin(goal)} daily goal`,
+      dailyGoalHighlightStyle: { display: 'table', margin: '0 auto 16px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 20, color: t.accentDark, background: t.accentSoft, padding: '8px 16px', borderRadius: 14 },
+      weeklyBannerStyle: { display: 'flex', alignItems: 'center', gap: 10, background: t.accent, color: isDark ? t.bg : '#fff', borderRadius: 16, padding: '14px 16px', marginTop: 16, cursor: 'pointer' },
+      weeklyBannerSub: `${streak}-day streak so far — see the full recap`,
+      todayTaskCountLabel: `${todayStatsD.completedCount}/${todayStatsD.totalCount} done`,
+      todayTasksEmpty: todayTasks.length === 0,
+      todayTasks,
+      fabStyle: { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: '50%', background: t.accent, color: isDark ? t.bg : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 400, boxShadow: '0 8px 20px rgba(0,0,0,0.2)', cursor: 'pointer' },
+
+      ...this.calendarVals(s, t, isDark, today, todayIso, goal),
+      ...this.progressVals(s, t, isDark, today, todayIso, goal, seg),
+      ...this.addTaskVals(s, t, isDark, today),
+      ...this.daySummaryVals(s, t, isDark, todayIso, goal),
+      ...this.weeklySummaryVals(s, t, isDark, today, todayIso, goal),
+      ...this.settingsVals(s, t, isDark, seg),
+    };
+  }
+
+  calendarVals(s, t, isDark, today, todayIso, goal) {
+    const base = new Date(today.getFullYear(), today.getMonth() + s.monthOffset, 1);
+    const year = base.getFullYear(), month = base.getMonth();
+    const firstDow = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    const makeCell = (d, inMonth) => {
+      const iso = isoLocal(d);
+      const stats = dayStats(s.tasks, iso, goal, todayIso);
+      const isToday = iso === todayIso;
+      let bg = 'transparent', color = inMonth ? t.text : t.textMuted, border = '2px solid transparent';
+      if (stats.status === 'met') { bg = t.accent; color = isDark ? t.bg : '#fff'; }
+      else if (stats.status === 'partial') { bg = t.accentSoft; color = t.text; }
+      if (isToday) border = `2px solid ${t.accent}`;
+      return {
+        iso, dayNumber: d.getDate(),
+        onClick: () => this.setState({ screen: 'daySummary', selectedDate: iso }),
+        style: { width: 36, height: 36, margin: '0 auto', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bg, color, border, fontSize: 13, fontWeight: isToday ? 700 : 500, cursor: 'pointer', opacity: inMonth ? 1 : 0.35 },
+      };
+    };
+    for (let i = 0; i < firstDow; i++) cells.push(makeCell(new Date(year, month, i - firstDow + 1), false));
+    for (let d = 1; d <= daysInMonth; d++) cells.push(makeCell(new Date(year, month, d), true));
+    while (cells.length < 42) { const last = cells[cells.length - 1]; cells.push(makeCell(addDays(new Date(last.iso), 1), false)); }
+
+    const weekStart = addDays(today, -6 + s.weekOffset * 7);
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart, i);
+      const iso = isoLocal(d);
+      const stats = dayStats(s.tasks, iso, goal, todayIso);
+      let dotColor = t.border;
+      if (stats.status === 'met') dotColor = t.accent;
+      else if (stats.status === 'partial') dotColor = t.amber;
+      weekDays.push({
+        weekdayLabel: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dateLabel: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        minutesLabel: stats.totalMinutes > 0 ? fmtMin(stats.totalMinutes) : '—',
+        dotStyle: { width: 10, height: 10, borderRadius: '50%', background: dotColor, flexShrink: 0 },
+        cardStyle: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: t.card, borderRadius: 14, padding: '12px 14px', boxShadow: t.shadow, cursor: 'pointer', border: iso === todayIso ? `1.5px solid ${t.accent}` : '1.5px solid transparent' },
+        onClick: () => this.setState({ screen: 'daySummary', selectedDate: iso }),
+      });
+    }
+
+    return {
+      calendarMode: s.calendarMode,
+      setMonthMode: () => this.setState({ calendarMode: 'month' }),
+      setWeekMode: () => this.setState({ calendarMode: 'week' }),
+      segMonthStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: s.calendarMode === 'month' ? t.card : 'transparent', color: s.calendarMode === 'month' ? t.text : t.textMuted, boxShadow: s.calendarMode === 'month' ? t.shadow : 'none' },
+      segWeekStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: s.calendarMode === 'week' ? t.card : 'transparent', color: s.calendarMode === 'week' ? t.text : t.textMuted, boxShadow: s.calendarMode === 'week' ? t.shadow : 'none' },
+      monthLabel: base.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      prevMonth: () => this.setState(st => ({ monthOffset: st.monthOffset - 1 })),
+      nextMonth: () => this.setState(st => ({ monthOffset: Math.min(0, st.monthOffset + 1) })),
+      weekdayLabels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      monthGrid: cells,
+      weekLabel: `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+      prevWeek: () => this.setState(st => ({ weekOffset: st.weekOffset - 1 })),
+      nextWeek: () => this.setState(st => ({ weekOffset: Math.min(0, st.weekOffset + 1) })),
+      weekDays,
+      calendarStreakLabel: `${computeStreak(s.tasks, goal, today)}-day streak — keep showing up`,
+    };
+  }
+
+  progressVals(s, t, isDark, today, todayIso, goal, seg) {
+    const range = s.progressRange;
+    const nDays = range === 'week' ? 7 : 28;
+    const days = [];
+    for (let i = nDays - 1; i >= 0; i--) days.push(dayStats(s.tasks, isoLocal(addDays(today, -i)), goal, todayIso));
+    const totalMinutes = days.reduce((sum, d) => sum + d.completedMinutes, 0);
+    const pastDays = days.slice(0, days.length - 1);
+    const metCount = pastDays.filter(d => d.status === 'met').length;
+    const goalCompletionPct = pastDays.length ? Math.round((metCount / pastDays.length) * 100) : 0;
+
+    let chartBars;
+    if (range === 'week') {
+      const maxVal = Math.max(goal, ...days.map(d => d.completedMinutes), 1);
+      chartBars = days.map((d, i) => {
+        const dayDate = addDays(today, -(6 - i));
+        const dLabel = dayDate.toLocaleDateString('en-US', { weekday: 'narrow' });
+        const iso = isoLocal(dayDate);
+        const h = Math.round((d.completedMinutes / maxVal) * 110);
+        return {
+          label: dLabel,
+          onClick: () => this.setState({ screen: 'daySummary', selectedDate: iso }),
+          colStyle: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' },
+          trackStyle: { width: '100%', maxWidth: 22, height: 110, background: t.accentSoft, borderRadius: 8, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' },
+          fillStyle: { width: '100%', height: Math.max(4, h), background: d.completedMinutes >= goal ? `linear-gradient(to top, ${t.accentSoft}, ${t.accent})` : `linear-gradient(to top, ${t.amberSoft}, ${t.amber})`, borderRadius: 8, transition: 'height 0.3s ease' },
+        };
+      });
+    } else {
+      const buckets = [];
+      for (let w = 0; w < 4; w++) {
+        const slice = days.slice(w * 7, w * 7 + 7);
+        buckets.push(slice.reduce((sum, d) => sum + d.completedMinutes, 0));
+      }
+      const maxVal = Math.max(...buckets, 1);
+      chartBars = buckets.map((v, i) => ({
+        label: i === 3 ? 'This wk' : `${4 - i}w ago`,
+        colStyle: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' },
+        trackStyle: { width: '100%', maxWidth: 34, height: 110, background: t.accentSoft, borderRadius: 8, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' },
+        fillStyle: { width: '100%', height: Math.max(4, Math.round((v / maxVal) * 110)), background: t.accent, borderRadius: 8, transition: 'height 0.3s ease' },
+      }));
+    }
+
+    const bySubject = {};
+    days.forEach(d => d.dayTasks.forEach(tk => { if (tk.completed) bySubject[tk.subject] = (bySubject[tk.subject] || 0) + tk.duration; }));
+    const subjectTotal = Object.values(bySubject).reduce((a, b) => a + b, 0) || 1;
+    const subjectRows = SUBJECTS.filter(sub => bySubject[sub]).sort((a, b) => bySubject[b] - bySubject[a]).map(sub => ({
+      label: sub, valueLabel: fmtMin(bySubject[sub]),
+      trackStyle: { width: '100%', height: 8, background: t.accentSoft, borderRadius: 4, overflow: 'hidden' },
+      barStyle: { width: `${Math.round((bySubject[sub] / subjectTotal) * 100)}%`, height: '100%', background: subjectColor(sub, s.theme), borderRadius: 4 },
+    }));
+
+    return {
+      progressRange: range,
+      setRangeWeek: () => this.setState({ progressRange: 'week' }),
+      setRangeMonth: () => this.setState({ progressRange: 'month' }),
+      segProgWeekStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: range === 'week' ? t.card : 'transparent', color: range === 'week' ? t.text : t.textMuted, boxShadow: range === 'week' ? t.shadow : 'none' },
+      segProgMonthStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: range === 'month' ? t.card : 'transparent', color: range === 'month' ? t.text : t.textMuted, boxShadow: range === 'month' ? t.shadow : 'none' },
+      totalStudyLabel: fmtMin(totalMinutes),
+      goalCompletionLabel: `${goalCompletionPct}%`,
+      chartBars, subjectRows,
+    };
+  }
+
+  addTaskVals(s, t, isDark, today) {
+    const f = s.addForm;
+    const set = (patch) => this.setState(st => ({ addForm: { ...st.addForm, ...patch } }));
+    const chipStyle = (active) => ({ padding: '9px 14px', borderRadius: 12, fontSize: 13, fontWeight: 500, cursor: 'pointer', background: active ? t.accent : t.card, color: active ? (isDark ? t.bg : '#fff') : t.text, border: `1.5px solid ${active ? 'transparent' : t.border}` });
+    return {
+      formName: f.name,
+      setFormName: (e) => set({ name: e.target.value }),
+      formNotes: f.notes,
+      setFormNotes: (e) => set({ notes: e.target.value }),
+      addTaskDateLabel: today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      subjectChips: SUBJECTS.map(sub => ({ name: sub, style: chipStyle(f.subject === sub), onClick: () => set({ subject: sub }) })),
+      durationChips: [15, 30, 45, 60, 90].map(v => ({ label: v >= 60 ? `${v / 60}h` : `${v}m`, style: chipStyle(f.duration === v), onClick: () => set({ duration: v }) })),
+      priorityOptions: ['low', 'med', 'high'].map(p => {
+        const active = f.priority === p;
+        const solid = priorityColor(p, t);
+        const soft = p === 'high' ? t.coralSoft : p === 'med' ? t.amberSoft : t.accentSoft;
+        return {
+          value: p, label: priorityLabel(p),
+          style: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: active ? solid : soft, color: active ? (isDark ? t.bg : '#fff') : t.text, boxShadow: active ? t.shadow : 'none' },
+          onClick: () => set({ priority: p }),
+        };
+      }),
+      toggleFormReminder: () => set({ reminder: !f.reminder }),
+      reminderSwitchTrackStyle: { width: 46, height: 26, borderRadius: 13, background: f.reminder ? t.accent : t.border, position: 'relative', cursor: 'pointer', transition: 'background 0.2s ease' },
+      reminderSwitchThumbStyle: { position: 'absolute', top: 3, left: f.reminder ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' },
+      canSave: f.name.trim().length > 0,
+      addTaskHeaderLabel: f.id ? 'Edit Task' : 'Add Task',
+      saveButtonLabel: f.id ? 'Save changes' : 'Save task',
+      isEditingTask: !!f.id,
+      deleteCurrentTask: () => {
+        this.deleteTaskById(f.id);
+        this.setState({
+          screen: 'dashboard',
+          addForm: { id: null, subject: 'Math', name: '', duration: 30, priority: 'med', notes: '', reminder: true },
+        });
+      },
+      deleteTaskButtonStyle: { background: t.coralSoft, color: t.coral, textAlign: 'center', padding: '15px 0', borderRadius: 14, fontSize: 15, fontWeight: 600, cursor: 'pointer', marginTop: 10 },
+      saveTask: () => {
+        if (!f.name.trim()) return;
+        if (f.id) {
+          this.setState(st => ({
+            tasks: st.tasks.map(tk => tk.id === f.id ? { ...tk, subject: f.subject, name: f.name.trim(), duration: f.duration, priority: f.priority } : tk),
+            screen: 'dashboard',
+            addForm: { id: null, subject: 'Math', name: '', duration: 30, priority: 'med', notes: '', reminder: true },
+          }));
+          return;
+        }
+        const iso = isoLocal(today);
+        this.setState(st => ({
+          tasks: [...st.tasks, { id: Date.now(), date: iso, subject: f.subject, name: f.name.trim(), duration: f.duration, priority: f.priority, completed: false }],
+          screen: 'dashboard',
+          addForm: { id: null, subject: 'Math', name: '', duration: 30, priority: 'med', notes: '', reminder: true },
+        }));
+      },
+      saveBarStyle: { position: 'sticky', left: 0, right: 0, bottom: 0, padding: '14px 20px 18px', background: `linear-gradient(to top, ${t.bg} 60%, transparent)` },
+      saveButtonStyle: { background: t.accent, color: isDark ? t.bg : '#fff', textAlign: 'center', padding: '15px 0', borderRadius: 14, fontSize: 15, fontWeight: 600, cursor: 'pointer' },
+    };
+  }
+
+  daySummaryVals(s, t, isDark, todayIso, goal) {
+    const iso = s.selectedDate || todayIso;
+    const d = new Date(iso + 'T00:00:00');
+    const stats = dayStats(s.tasks, iso, goal, todayIso);
+    return {
+      selectedDayLabel: d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      selectedDayStatsLabel: stats.totalCount > 0 ? `${fmtMin(stats.completedMinutes)} studied · ${stats.completedCount}/${stats.totalCount} tasks` : 'No sessions logged',
+      selectedDayEmpty: stats.totalCount === 0,
+      selectedDayTasks: stats.dayTasks.map(x => this.makeTaskRow(x, t, isDark)),
+    };
+  }
+
+  weeklySummaryVals(s, t, isDark, today, todayIso, goal) {
+    const days = [];
+    for (let i = 6; i >= 0; i--) days.push({ date: addDays(today, -i), stats: dayStats(s.tasks, isoLocal(addDays(today, -i)), goal, todayIso) });
+    const totalMinutes = days.reduce((sum, d) => sum + d.stats.completedMinutes, 0);
+    const tasksCompleted = days.reduce((sum, d) => sum + d.stats.completedCount, 0);
+    const best = days.reduce((a, b) => (b.stats.completedMinutes > a.stats.completedMinutes ? b : a), days[0]);
+    const maxVal = Math.max(goal, ...days.map(d => d.stats.completedMinutes), 1);
+    const weekMiniBars = days.map(d => ({
+      label: d.date.toLocaleDateString('en-US', { weekday: 'narrow' }),
+      onClick: () => this.setState({ screen: 'daySummary', selectedDate: isoLocal(d.date) }),
+      colStyle: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' },
+      trackStyle: { width: '100%', maxWidth: 22, height: 110, background: t.accentSoft, borderRadius: 8, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' },
+      fillStyle: { width: '100%', height: Math.max(4, Math.round((d.stats.completedMinutes / maxVal) * 110)), background: d.stats.completedMinutes >= goal ? `linear-gradient(to top, ${t.accentSoft}, ${t.accent})` : `linear-gradient(to top, ${t.amberSoft}, ${t.amber})`, borderRadius: 8 },
+    }));
+    return {
+      weekSummaryRangeLabel: `${days[0].date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+      totalHoursBig: (totalMinutes / 60).toFixed(1),
+      statCards: [
+        { label: 'Tasks completed', value: String(tasksCompleted) },
+        { label: 'Current streak', value: `${computeStreak(s.tasks, goal, today)}d` },
+        { label: 'Best day', value: best.date.toLocaleDateString('en-US', { weekday: 'short' }) },
+      ],
+      bestDayLabel: best.date.toLocaleDateString('en-US', { weekday: 'long' }),
+      weekMiniBars,
+      motivationalMsg: totalMinutes > goal * 5 ? 'Strong week — you studied consistently and hit your goal most days. Keep the rhythm going.' : "Good progress this week. A little more consistency and you'll be hitting your goal every day.",
+    };
+  }
+
+  settingsVals(s, t, isDark, seg) {
+    const hours = s.dailyGoalMinutes / 60;
+    return {
+      goalHoursLabel: hours % 1 === 0 ? `${hours}h` : `${hours.toFixed(2).replace(/0$/, '')}h`,
+      incGoal: () => this.setState(st => ({ dailyGoalMinutes: Math.min(480, st.dailyGoalMinutes + 15) })),
+      decGoal: () => this.setState(st => ({ dailyGoalMinutes: Math.max(30, st.dailyGoalMinutes - 15) })),
+      notifSessionTrackStyle: { width: 46, height: 26, borderRadius: 13, background: s.notifSession ? t.accent : t.border, position: 'relative', cursor: 'pointer', transition: 'background 0.2s ease' },
+      notifSessionThumbStyle: { position: 'absolute', top: 3, left: s.notifSession ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' },
+      toggleNotifSession: () => this.setState(st => ({ notifSession: !st.notifSession })),
+      notifNudgeTrackStyle: { width: 46, height: 26, borderRadius: 13, background: s.notifNudge ? t.accent : t.border, position: 'relative', cursor: 'pointer', transition: 'background 0.2s ease' },
+      notifNudgeThumbStyle: { position: 'absolute', top: 3, left: s.notifNudge ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.25)' },
+      toggleNotifNudge: () => this.setState(st => ({ notifNudge: !st.notifNudge })),
+      setLightTheme: () => this.setState({ theme: 'light' }),
+      setDarkTheme: () => this.setState({ theme: 'dark' }),
+      segLightStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: s.theme === 'light' ? t.card : 'transparent', color: s.theme === 'light' ? t.text : t.textMuted, boxShadow: s.theme === 'light' ? t.shadow : 'none' },
+      segDarkStyle: { flex: 1, textAlign: 'center', padding: '9px 0', borderRadius: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: s.theme === 'dark' ? t.card : 'transparent', color: s.theme === 'dark' ? t.text : t.textMuted, boxShadow: s.theme === 'dark' ? t.shadow : 'none' },
+    };
+  }
+}
+
+</script>
+</body>
+</html>
